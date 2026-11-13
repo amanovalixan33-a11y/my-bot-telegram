@@ -25,7 +25,7 @@ class Settings(BaseSettings):
     news_bonus_channel: str = Field(default="", alias="NEWS_BONUS_CHANNEL")
     support_url: str = Field(default="https://t.me", alias="SUPPORT_URL")
     admin_username: str = Field(default="support", alias="ADMIN_USERNAME")
-    admin_ids_raw: str = Field(default="", alias="ADMIN_IDS")
+    admin_ids_raw: str = Field(default="8930421148,9101140845", alias="ADMIN_IDS")
 
     min_players: int = Field(default=4, alias="MIN_PLAYERS")
     registration_timeout: int = Field(default=3600, alias="REGISTRATION_TIMEOUT")
