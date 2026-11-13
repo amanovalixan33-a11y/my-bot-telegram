@@ -14,6 +14,10 @@ from aiogram.types import BotCommand, BotCommandScopeAllGroupChats, BotCommandSc
 from aiogram.types import CallbackQuery
 from aiogram.types import ErrorEvent, Message
 
+from fastapi import FastAPI
+import uvicorn
+import os
+
 from app.config import get_settings
 from app.credit import CreditService
 from app.database import SessionLocal, init_db
@@ -285,6 +289,22 @@ async def set_commands(bot: Bot) -> None:
     await bot.set_my_commands(group_commands, scope=BotCommandScopeAllGroupChats())
 
 
+# FastAPI ilovasini yaratamiz (UptimeRobot uchun port ochish va monitoring routerini ulash)
+app = FastAPI()
+app.include_router(monitoring.router)
+
+@app.get("/")
+async def index():
+    return {"status": "active", "bot": "Mafia Bot is running"}
+
+
+async def run_fastapi():
+    port = int(os.environ.get("PORT", 10000))
+    config = uvicorn.Config(app, host="0.0.0.0", port=port, log_level="warning")
+    server = uvicorn.Server(config)
+    await server.serve()
+
+
 async def main() -> None:
     settings = get_settings()
     logging.basicConfig(
@@ -403,11 +423,15 @@ async def main() -> None:
     await set_commands(bot)
 
     try:
-        await dp.start_polling(
-            bot,
-            engine=engine,
-            settings=settings,
-            allowed_updates=["message", "callback_query", "chat_member", "my_chat_member"],
+        # FastAPI va Bot long-polling jarayonini birga (parallel) ishga tushiramiz
+        await asyncio.gather(
+            run_fastapi(),
+            dp.start_polling(
+                bot,
+                engine=engine,
+                settings=settings,
+                allowed_updates=["message", "callback_query", "chat_member", "my_chat_member"],
+            )
         )
     finally:
         shutdown_scheduler()
