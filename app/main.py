@@ -289,9 +289,8 @@ async def set_commands(bot: Bot) -> None:
     await bot.set_my_commands(group_commands, scope=BotCommandScopeAllGroupChats())
 
 
-# FastAPI ilovasini yaratamiz (UptimeRobot uchun port ochish va monitoring routerini ulash)
+# FastAPI ilovasini yaratamiz va port ochish uchun endpoint qo'shamiz
 app = FastAPI()
-app.include_router(monitoring.router)
 
 @app.get("/")
 async def index():
